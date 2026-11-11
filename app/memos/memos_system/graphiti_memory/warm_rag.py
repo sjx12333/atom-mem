@@ -247,6 +247,7 @@ def search_windows(
         if similarity < max(0.0, float(gate)):
             continue
         latest = window.entries[-1] if window.entries else {}
+        rerank_score = selected_scores.get(id(window)) if selected_scores else None
         ranked.append(
             {
                 "id": window.id,
@@ -256,11 +257,17 @@ def search_windows(
                 "source_type": "warm_layer",
                 "match_type": "direct",
                 "similarity": round(similarity, 6),
-                "final_score": round(similarity, 6),
+                # ``final_score`` is the order used by the gateway after RRF.
+                # When the reranker is available it must be the rerank score;
+                # admission still uses ``similarity`` above, so rerank can
+                # reorder but never admit a below-floor window.
+                "final_score": round(
+                    float(rerank_score) if rerank_score is not None else similarity, 6
+                ),
                 "score_source": "warm_raw_embedding" if window.vector else "warm_lexical_fallback",
                 "semantic_score": round(float(dense_score), 6),
                 "lexical_score": round(lexical, 6),
-                "rerank_score": selected_scores.get(id(window)) if selected_scores else None,
+                "rerank_score": rerank_score,
                 "content_hash": latest.get("content_hash"),
                 "batch_id": latest.get("batch_id"),
                 "conversation_id": latest.get("conversation_id"),

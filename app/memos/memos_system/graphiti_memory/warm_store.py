@@ -1004,7 +1004,16 @@ class WarmStore:
                 by_hash[digest] = item
         selected = [by_hash[digest] for digest in hash_order]
         selected.sort(
-            key=lambda item: (-float(item.get("final_score") or 0.0), str(item.get("created_at") or ""), str(item.get("id")))
+            key=lambda item: (
+                -float(
+                    item.get("rerank_score")
+                    if item.get("rerank_score") is not None
+                    else item.get("final_score") or 0.0
+                ),
+                -float(item.get("similarity") or 0.0),
+                str(item.get("created_at") or ""),
+                str(item.get("id")),
+            )
         )
         return selected[: max(0, int(top_k))]
 
