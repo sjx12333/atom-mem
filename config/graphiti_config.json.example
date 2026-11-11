@@ -156,7 +156,7 @@
     "auto_activate": true
   },
   "chat_backup": {
-    "enabled": true,
+    "enabled": false,
     "provider": "openai_compat",
     "base_url": "https://api.deepseek.com",
     "api_key": "",
